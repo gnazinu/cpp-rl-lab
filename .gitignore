@@ -1,0 +1,4 @@
+build/
+outputs/
+compile_commands.json
+cmake-build-*/
