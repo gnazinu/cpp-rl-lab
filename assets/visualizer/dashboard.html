@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>cpp-rl-lab Visual Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">cpp-rl-lab / visual dashboard</p>
+          <h1 id="dashboard-title">Maze Solver Dashboard</h1>
+          <p id="dashboard-subtitle" class="hero-subtitle"></p>
+        </div>
+        <div class="hero-badges">
+          <span class="pill" id="mode-pill">mode</span>
+          <span class="pill soft" id="agent-pill">agent</span>
+          <span class="pill soft" id="maze-pill">maze</span>
+        </div>
+      </header>
+
+      <main class="dashboard-grid">
+        <section class="panel span-12">
+          <div class="panel-head">
+            <h2>Run Summary</h2>
+            <p class="panel-copy">Main results, artifacts and confidence signals from the latest run.</p>
+          </div>
+          <div id="summary-grid" class="card-grid"></div>
+        </section>
+
+        <section class="panel span-8">
+          <div class="panel-head">
+            <h2>Training Curve</h2>
+            <p class="panel-copy">Reward per episode and moving average to see learning stability.</p>
+          </div>
+          <canvas id="reward-chart" class="chart-canvas" width="900" height="320"></canvas>
+        </section>
+
+        <section class="panel span-4">
+          <div class="panel-head">
+            <h2>Experiment Setup</h2>
+            <p class="panel-copy">Key configuration, file paths, and reward design parameters.</p>
+          </div>
+          <div id="configuration-grid" class="property-grid"></div>
+        </section>
+
+        <section class="panel span-8">
+          <div class="panel-head split">
+            <div>
+              <h2>Episode Explorer</h2>
+              <p class="panel-copy">Replay the agent step by step, inspect the maze and follow every decision.</p>
+            </div>
+            <div id="trace-meta" class="trace-meta"></div>
+          </div>
+
+          <div class="explorer-layout">
+            <div class="maze-stage">
+              <div id="maze-grid" class="maze-grid"></div>
+              <div id="maze-caption" class="maze-caption"></div>
+            </div>
+
+            <div class="playback-panel">
+              <div class="controls-row">
+                <button id="play-toggle" class="button primary">Play</button>
+                <button id="restart-step" class="button">Reset</button>
+                <button id="prev-step" class="button">Prev</button>
+                <button id="next-step" class="button">Next</button>
+                <label class="speed-control">
+                  <span>Speed</span>
+                  <select id="speed-select">
+                    <option value="1200">0.5x</option>
+                    <option value="700" selected>1x</option>
+                    <option value="350">2x</option>
+                    <option value="180">4x</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="slider-wrap">
+                <input id="step-slider" type="range" min="0" max="0" value="0">
+                <div id="step-counter" class="step-counter">Step 0 / 0</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel span-4">
+          <div class="panel-head">
+            <h2>Decision Detail</h2>
+            <p class="panel-copy">Current step, reward signal, action validity and value estimates.</p>
+          </div>
+          <div id="step-details" class="detail-stack"></div>
+          <div id="action-values" class="action-value-stack"></div>
+        </section>
+
+        <section class="panel span-6">
+          <div class="panel-head">
+            <h2>Control Signals</h2>
+            <p class="panel-copy">Exploration pressure and success rate over time.</p>
+          </div>
+          <canvas id="control-chart" class="chart-canvas" width="900" height="280"></canvas>
+        </section>
+
+        <section class="panel span-6">
+          <div class="panel-head">
+            <h2>Evaluation Checkpoints</h2>
+            <p class="panel-copy">Greedy validation snapshots captured during training or playback runs.</p>
+          </div>
+          <canvas id="evaluation-chart" class="chart-canvas" width="900" height="280"></canvas>
+        </section>
+
+        <section class="panel span-12">
+          <div class="panel-head">
+            <h2>Trace Library</h2>
+            <p class="panel-copy">Choose training, evaluation or random episodes and inspect them in the explorer.</p>
+          </div>
+          <div id="trace-list" class="trace-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="dashboard_data.js"></script>
+    <script src="dashboard.js"></script>
+  </body>
+</html>

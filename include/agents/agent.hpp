@@ -33,6 +33,10 @@ class Agent {
     virtual double current_epsilon() const {
         return 0.0;
     }
+    virtual std::vector<double> action_values(int state) const {
+        (void)state;
+        return {};
+    }
 };
 
 }  // namespace rl::agents

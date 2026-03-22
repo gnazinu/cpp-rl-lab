@@ -41,6 +41,7 @@ class QLearningAgent : public Agent {
     void save(const std::filesystem::path& path) const override;
     void load(const std::filesystem::path& path) override;
     double current_epsilon() const override;
+    std::vector<double> action_values(int state) const override;
 
     double q_value(int state, core::Action action) const;
     void set_q_value(int state, core::Action action, double value);

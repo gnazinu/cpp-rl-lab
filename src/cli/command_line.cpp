@@ -170,6 +170,16 @@ CommandLineOptions parse_arguments(const int argc, char** argv) {
                 parse_double(require_value(argc, argv, index, argument), argument);
             continue;
         }
+        if (argument == "--trace-interval") {
+            options.trace_interval =
+                parse_size_t(require_value(argc, argv, index, argument), argument);
+            continue;
+        }
+        if (argument == "--dashboard-episodes") {
+            options.dashboard_episodes =
+                parse_size_t(require_value(argc, argv, index, argument), argument);
+            continue;
+        }
 
         throw std::runtime_error("unknown option: " + argument);
     }
@@ -182,6 +192,9 @@ CommandLineOptions parse_arguments(const int argc, char** argv) {
     }
     if (options.mode == CommandMode::Eval && options.policy_path.empty()) {
         throw std::runtime_error("--policy is required in eval mode");
+    }
+    if (options.dashboard_episodes == 0) {
+        throw std::runtime_error("--dashboard-episodes must be greater than zero");
     }
     if (options.output_dir.empty()) {
         options.output_dir = default_output_dir(options.mode);
@@ -217,7 +230,11 @@ std::string usage(const char* program_name) {
            "  --discount <value>        Q-learning gamma.\n" +
            "  --epsilon-start <value>   Initial epsilon.\n" +
            "  --epsilon-min <value>     Minimum epsilon.\n" +
-           "  --epsilon-decay <value>   Per-episode epsilon decay.\n\n" +
+           "  --epsilon-decay <value>   Per-episode epsilon decay.\n" +
+           "  --trace-interval <n>      Record one training trace every n "
+           "episodes for the dashboard.\n" +
+           "  --dashboard-episodes <n>  Number of episodes to keep in the "
+           "interactive playback view.\n\n" +
            "Examples:\n" +
            "  " + program_name +
            " train --maze configs/mazes/basic.txt --episodes 2000 --seed 42\n" +

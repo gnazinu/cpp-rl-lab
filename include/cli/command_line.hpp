@@ -29,6 +29,8 @@ struct CommandLineOptions {
     double epsilon_start = 1.0;
     double epsilon_min = 0.05;
     double epsilon_decay = 0.995;
+    std::size_t trace_interval = 100;
+    std::size_t dashboard_episodes = 5;
     bool random_valid_actions_only = true;
 };
 

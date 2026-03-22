@@ -39,6 +39,12 @@
 - `MetricsLogger` for per-episode CSV export
 - moving-average reward and running success-rate tracking
 
+### `render`
+
+- `TraceRecorder` for capturing step-by-step episode traces without entangling the training loop
+- dashboard export for static HTML/CSS/JS bundles in each run output directory
+- playback-oriented data packaging such as action values, evaluation checkpoints, and maze metadata
+
 ### `cli`
 
 - command parsing and mode selection
@@ -54,7 +60,8 @@
 - `MazeEnvironment` implements `Environment`.
 - `RandomAgent` and `QLearningAgent` implement `Agent`.
 - `MetricsLogger` is injected into training or evaluation runs so metrics export stays independent from the environment and agent logic.
-- `main.cpp` composes the concrete maze, agent, trainer, and logger for each CLI command.
+- `TraceRecorder` attaches to `Trainer` as an optional observer-like recorder for selected episodes.
+- `main.cpp` composes the concrete maze, agent, trainer, logger, and dashboard exporter for each CLI command.
 
 ## Design Decisions
 
@@ -80,9 +87,13 @@ This gives the agent a sparse success signal while still nudging it toward short
 
 The Q-table is stored in a simple text format. That keeps checkpoints human-readable, diffable, and easy to debug without bringing in a JSON dependency.
 
+### Visualization Strategy
+
+The visual layer is exported as a static dashboard bundle per run instead of depending on a native GUI toolkit. This keeps the C++ core dependency-light while still giving the project an interactive way to inspect trajectories, metrics, and learned values.
+
 ### Testing Strategy
 
-The V1 test setup uses a lightweight internal test executable wired into CTest. That keeps the build dependency-free while still providing meaningful coverage of parsing, environment transitions, learning updates, and training behavior.
+The V1 test setup uses a lightweight internal test executable wired into CTest. That keeps the build dependency-free while still providing meaningful coverage of parsing, environment transitions, learning updates, training behavior, and dashboard export smoke checks.
 
 ## Extension Points
 
@@ -91,7 +102,7 @@ The current structure is meant to make these follow-on upgrades straightforward:
 - SARSA: add a new tabular agent that reuses the same environment, metrics, and CLI wiring
 - DQN: introduce a new agent implementation and a replay buffer module without changing the environment interface
 - new environments: implement `Environment` for additional tasks such as cliff-walking, cart-pole approximations, or custom games
-- rendering layer: add dedicated ASCII or graphical renderers under `render/`
+- rendering layer: add live renderers, richer timeline views, or remote experiment dashboards under `render/`
 - experiment configs: load hyperparameters and run settings from config files rather than only CLI flags
 
 ## V2 Ideas
@@ -99,5 +110,5 @@ The current structure is meant to make these follow-on upgrades straightforward:
 - richer checkpoint metadata and experiment manifests
 - batched experiment sweeps
 - stochastic transitions and reward variants
-- policy visualization and trajectory playback
+- policy comparison views and multi-run dashboards
 - richer evaluation reports and comparative baselines

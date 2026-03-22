@@ -10,6 +10,7 @@ It currently ships with:
 - a random baseline agent
 - training and evaluation CLI workflows
 - CSV metrics export and policy checkpointing
+- an interactive visual dashboard generated for every run
 - sample mazes, tests, and architecture docs
 
 ## Architecture
@@ -21,6 +22,7 @@ Top-level modules:
 - `include/agents`, `src/agents`: agent abstractions, random baseline, Q-learning
 - `include/training`, `src/training`: episode loops, evaluation, checkpointing
 - `include/metrics`, `src/metrics`: CSV metrics logging
+- `include/render`, `src/render`: episode trace capture and interactive dashboard export
 - `include/cli`, `src/cli`: command parsing
 - `tests`: parser, environment, agent, and trainer behavior tests
 - `configs/mazes`: sample human-readable maze layouts
@@ -66,6 +68,7 @@ The test suite covers:
 - Q-learning Bellman update correctness
 - deterministic seeded behavior
 - a small end-to-end learning-vs-random regression
+- dashboard bundle export and trace capture smoke coverage
 
 ## CLI Usage
 
@@ -101,9 +104,38 @@ The test suite covers:
   --epsilon-start 1.0 \
   --epsilon-min 0.05 \
   --epsilon-decay 0.995 \
+  --trace-interval 100 \
+  --dashboard-episodes 5 \
   --seed 42 \
   --output-dir outputs/complex_train
 ```
+
+### Open the Interactive Dashboard
+
+Every `train`, `eval`, and `random` run now writes a static visual dashboard in its output directory.
+
+After training:
+
+```bash
+./build/cpp_rl_lab train --maze configs/mazes/basic.txt --episodes 1500 --seed 42 --output-dir outputs/basic_train
+xdg-open outputs/basic_train/dashboard.html
+```
+
+If you prefer serving it over a local HTTP server:
+
+```bash
+./scripts/serve_dashboard.sh outputs/basic_train
+```
+
+The dashboard shows:
+
+- episode reward and moving-average charts
+- success rate and epsilon curves
+- evaluation checkpoints
+- an interactive maze playback panel with play, pause, step, and scrub controls
+- traced training/evaluation/random episodes
+- per-step decisions, rewards, valid actions, wall collisions, and terminal signals
+- state-action value bars and a maze heatmap when the active agent exposes Q-values
 
 ## Maze Format
 
@@ -172,6 +204,10 @@ Training writes:
 - `training_metrics.csv`
 - `final_policy.qtable`
 - `best_policy.qtable`
+- `dashboard.html`
+- `dashboard.css`
+- `dashboard.js`
+- `dashboard_data.js`
 
 Evaluation and random runs write their own CSV files inside the chosen output directory.
 
@@ -185,6 +221,15 @@ Each CSV row includes at least:
 
 The logger also writes moving-average reward and running success rate to make experiment trends easier to inspect.
 
+The dashboard data file embeds:
+
+- run summary cards
+- configuration details
+- full episode metrics
+- evaluation checkpoints
+- traced episodes for playback
+- state-action values when available
+
 ## Included Mazes
 
 - `configs/mazes/basic.txt`: small starter maze
@@ -194,7 +239,8 @@ The logger also writes moving-average reward and running success rate to make ex
 
 - only tabular agents are implemented in V1
 - the environment is deterministic and single-agent
-- there is no separate rendering subsystem yet beyond ASCII state rendering from the maze environment
+- the dashboard is a static exported web app rather than a live in-process renderer
+- very long runs can generate large dashboard trace files if you choose aggressive trace settings
 - checkpoints use a simple custom text format rather than a richer experiment manifest
 - CLI configuration is flag-based rather than config-file driven
 
@@ -205,4 +251,4 @@ The logger also writes moving-average reward and running success rate to make ex
 - multiple environments beyond mazes
 - richer experiment configuration files
 - run summaries, plots, and policy trajectory visualization
-- optional graphical rendering layer
+- live graphical rendering or a desktop/web control panel

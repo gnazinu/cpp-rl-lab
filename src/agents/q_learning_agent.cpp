@@ -211,6 +211,11 @@ double QLearningAgent::current_epsilon() const {
     return epsilon_;
 }
 
+std::vector<double> QLearningAgent::action_values(const int state) const {
+    validate_state(state);
+    return q_table_[static_cast<std::size_t>(state)];
+}
+
 double QLearningAgent::q_value(const int state, const core::Action action) const {
     validate_state(state);
     return q_table_[static_cast<std::size_t>(state)][core::to_index(action)];

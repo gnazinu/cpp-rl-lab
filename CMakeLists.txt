@@ -14,6 +14,8 @@ add_library(cpp_rl_lab_lib
     src/env/maze_environment.cpp
     src/env/maze_layout.cpp
     src/metrics/metrics_logger.cpp
+    src/render/dashboard.cpp
+    src/render/trace_recorder.cpp
     src/training/trainer.cpp
     src/utils/filesystem.cpp
 )
@@ -21,6 +23,11 @@ add_library(cpp_rl_lab_lib
 target_include_directories(cpp_rl_lab_lib
     PUBLIC
         ${PROJECT_SOURCE_DIR}/include
+)
+
+target_compile_definitions(cpp_rl_lab_lib
+    PUBLIC
+        CPP_RL_LAB_SOURCE_DIR="${PROJECT_SOURCE_DIR}"
 )
 
 target_compile_features(cpp_rl_lab_lib PUBLIC cxx_std_17)
@@ -41,6 +48,7 @@ add_executable(cpp_rl_lab_tests
     tests/test_agents.cpp
     tests/test_environment.cpp
     tests/test_maze_layout.cpp
+    tests/test_render.cpp
     tests/test_training.cpp
 )
 
