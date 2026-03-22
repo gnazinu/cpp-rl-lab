@@ -1,150 +1,245 @@
 # cpp-rl-lab
 
-`cpp-rl-lab` is a modern C++ reinforcement learning lab built around a deterministic Maze Solver environment. The V1 goal is to provide a clean, reproducible foundation for experimenting with RL algorithms, not just a one-off maze demo.
+`cpp-rl-lab` is a reinforcement learning project in modern C++ built to teach, not just to demo.
 
-It currently ships with:
+The core idea is simple: train an agent to solve grid mazes, then inspect exactly how and why it improves. Under the hood, the repo is structured like a small RL framework, with clean environment and agent abstractions, reproducible experiment outputs, tests, and an interactive visual dashboard for replaying what the agent does.
+
+It is meant to be useful for:
+
+- learning reinforcement learning through a concrete, understandable environment
+- learning how to structure RL code in clean modern C++
+- exploring Q-learning, exploration, reward shaping, and evaluation
+- building a portfolio-ready systems + AI project that is easy to extend
+
+## What You Learn From This Project
+
+This project is designed so that running it teaches you real RL ideas, not just maze mechanics.
+
+By working through `cpp-rl-lab`, you can learn:
+
+- how an RL problem is modeled as `state`, `action`, `reward`, and `termination`
+- how to design an `Environment` interface that is reusable across tasks
+- how epsilon-greedy exploration changes agent behavior over time
+- how tabular Q-learning updates a policy from experience
+- how reward design affects learning speed and final behavior
+- how to compare a learned policy against a random baseline
+- how to log reproducible metrics and checkpoints for experiments
+- how to inspect agent decisions visually instead of treating training like a black box
+
+In other words, this repo is both:
+
+- a working maze-solving RL system
+- a compact reference implementation of RL architecture in C++
+
+## What The Project Does
+
+V1 includes:
 
 - a reusable `Environment` / `Agent` / `Trainer` architecture
-- a text-defined grid maze environment
+- a deterministic grid-based maze environment
 - a tabular Q-learning agent
 - a random baseline agent
-- training and evaluation CLI workflows
-- CSV metrics export and policy checkpointing
-- an interactive visual dashboard generated for every run
-- sample mazes, tests, and architecture docs
+- training, evaluation, and baseline CLI workflows
+- CSV metrics export
+- checkpoint saving/loading for the learned Q-table
+- sample maze files
+- tests for environment, agent, training, and render-related behavior
+- an interactive dashboard generated for every run
 
-## Architecture
+This means you can:
 
-Top-level modules:
+1. train an agent on a maze
+2. save the learned policy
+3. evaluate that policy
+4. compare it against a random agent
+5. open a dashboard to replay episodes step by step
+6. inspect rewards, success rate, epsilon decay, and value estimates
 
-- `include/core`, `src/core`: shared RL types and action definitions
-- `include/env`, `src/env`: environment interfaces, maze parsing, maze dynamics
-- `include/agents`, `src/agents`: agent abstractions, random baseline, Q-learning
-- `include/training`, `src/training`: episode loops, evaluation, checkpointing
-- `include/metrics`, `src/metrics`: CSV metrics logging
-- `include/render`, `src/render`: episode trace capture and interactive dashboard export
-- `include/cli`, `src/cli`: command parsing
-- `tests`: parser, environment, agent, and trainer behavior tests
-- `configs/mazes`: sample human-readable maze layouts
-- `docs/architecture.md`: design rationale and extension points
+## Why The Visual Dashboard Matters
 
-For a deeper design breakdown, see [docs/architecture.md](docs/architecture.md).
+A lot of RL projects tell you only whether the reward went up.
 
-## Build
+This one also lets you see:
 
-Standard CMake build:
+- where the agent moves in the maze
+- when it hits walls or wastes steps
+- how training episodes differ from greedy evaluation episodes
+- how Q-values change the decisions it prefers
+- how exploration decays over time
+- how learned behavior compares with random behavior
 
-```bash
-cmake -S . -B build -G Ninja
-cmake --build build
-```
+Each run exports a static dashboard to the output directory, so you can open it locally without adding GUI dependencies to the C++ project.
 
-If `cmake` is not on your `PATH`, the repo includes a helper script that also checks a common CLion-bundled CMake location:
+## Quick Start
+
+Build:
 
 ```bash
 ./scripts/build.sh
 ```
 
-## Test
-
-Run the full test suite after building:
-
-```bash
-ctest --test-dir build --output-on-failure
-```
-
-Or use the helper:
+Run tests:
 
 ```bash
 ./scripts/test.sh
 ```
 
-The test suite covers:
-
-- maze parsing and validation
-- reset and transition behavior
-- wall collision handling
-- terminal conditions
-- Q-learning Bellman update correctness
-- deterministic seeded behavior
-- a small end-to-end learning-vs-random regression
-- dashboard bundle export and trace capture smoke coverage
-
-## CLI Usage
-
-### Train
-
-```bash
-./build/cpp_rl_lab train --maze configs/mazes/basic.txt --episodes 2000 --seed 42 --output-dir outputs/basic_train
-```
-
-### Evaluate a Saved Policy
-
-```bash
-./build/cpp_rl_lab eval --maze configs/mazes/basic.txt --policy outputs/basic_train/final_policy.qtable --episodes 100 --seed 42
-```
-
-### Run the Random Baseline
-
-```bash
-./build/cpp_rl_lab random --maze configs/mazes/basic.txt --episodes 100 --seed 42 --output-dir outputs/basic_random
-```
-
-### Helpful Training Flags
+Train on the basic maze:
 
 ```bash
 ./build/cpp_rl_lab train \
-  --maze configs/mazes/complex.txt \
-  --episodes 3000 \
-  --max-steps 200 \
-  --eval-interval 100 \
-  --eval-episodes 50 \
-  --learning-rate 0.1 \
-  --discount 0.95 \
-  --epsilon-start 1.0 \
-  --epsilon-min 0.05 \
-  --epsilon-decay 0.995 \
-  --trace-interval 100 \
-  --dashboard-episodes 5 \
+  --maze configs/mazes/basic.txt \
+  --episodes 400 \
   --seed 42 \
-  --output-dir outputs/complex_train
+  --trace-interval 80 \
+  --dashboard-episodes 4 \
+  --output-dir outputs/basic_train
 ```
 
-### Open the Interactive Dashboard
-
-Every `train`, `eval`, and `random` run now writes a static visual dashboard in its output directory.
-
-After training:
+Open the dashboard:
 
 ```bash
-./build/cpp_rl_lab train --maze configs/mazes/basic.txt --episodes 1500 --seed 42 --output-dir outputs/basic_train
 xdg-open outputs/basic_train/dashboard.html
 ```
 
-If you prefer serving it over a local HTTP server:
+Evaluate the saved policy:
+
+```bash
+./build/cpp_rl_lab eval \
+  --maze configs/mazes/basic.txt \
+  --policy outputs/basic_train/final_policy.qtable \
+  --episodes 40 \
+  --seed 42 \
+  --dashboard-episodes 4 \
+  --output-dir outputs/basic_eval
+```
+
+Run the random baseline:
+
+```bash
+./build/cpp_rl_lab random \
+  --maze configs/mazes/basic.txt \
+  --episodes 40 \
+  --seed 42 \
+  --dashboard-episodes 4 \
+  --output-dir outputs/basic_random
+```
+
+Serve dashboards over a local HTTP server if you prefer:
 
 ```bash
 ./scripts/serve_dashboard.sh outputs/basic_train
 ```
 
-The dashboard shows:
+## CLI Overview
 
-- episode reward and moving-average charts
+Main commands:
+
+- `train`: learn a Q-table from repeated episodes
+- `eval`: load a saved policy and run greedy evaluation
+- `random`: run the baseline random agent for comparison
+
+Examples:
+
+```bash
+./build/cpp_rl_lab train --maze configs/mazes/basic.txt --episodes 2000 --seed 42 --output-dir outputs/train_run
+./build/cpp_rl_lab eval --maze configs/mazes/basic.txt --policy outputs/train_run/final_policy.qtable --episodes 100 --seed 42 --output-dir outputs/eval_run
+./build/cpp_rl_lab random --maze configs/mazes/basic.txt --episodes 100 --seed 42 --output-dir outputs/random_run
+```
+
+Useful training flags:
+
+```bash
+--max-steps <n>
+--eval-interval <n>
+--eval-episodes <n>
+--learning-rate <value>
+--discount <value>
+--epsilon-start <value>
+--epsilon-min <value>
+--epsilon-decay <value>
+--trace-interval <n>
+--dashboard-episodes <n>
+```
+
+## How The RL Part Works
+
+### Environment
+
+The environment is a deterministic maze/gridworld.
+
+- state: the agent position, represented as a flattened cell index
+- actions: `up`, `down`, `left`, `right`
+- transition: movement to adjacent cells unless blocked by a wall
+- terminal conditions:
+  - reaching the goal
+  - exceeding the max step limit
+
+### Rewards
+
+The default reward design is:
+
+- `+10.0` for reaching the goal
+- `-0.1` per step
+- `-0.75` additional penalty for invalid moves
+
+This encourages the agent to:
+
+- solve the maze
+- solve it efficiently
+- avoid repeatedly colliding with walls
+
+### Q-Learning
+
+The learning agent uses tabular Q-learning with epsilon-greedy exploration.
+
+Update rule:
+
+```text
+Q(s, a) <- Q(s, a) + alpha * (reward + gamma * max_a' Q(s', a') - Q(s, a))
+```
+
+Configurable parameters:
+
+- learning rate
+- discount factor
+- epsilon start
+- epsilon minimum
+- epsilon decay
+
+The learned Q-table is saved in a plain-text format so it is easy to inspect and version.
+
+## Interactive Dashboard
+
+Every run exports:
+
+- `dashboard.html`
+- `dashboard.css`
+- `dashboard.js`
+- `dashboard_data.js`
+
+The dashboard includes:
+
+- reward per episode chart
+- moving average reward chart
 - success rate and epsilon curves
 - evaluation checkpoints
-- an interactive maze playback panel with play, pause, step, and scrub controls
-- traced training/evaluation/random episodes
-- per-step decisions, rewards, valid actions, wall collisions, and terminal signals
-- state-action value bars and a maze heatmap when the active agent exposes Q-values
+- episode trace library
+- interactive playback with play, pause, step, and slider controls
+- current-step decision details
+- wall-collision and terminal-state visibility
+- Q-value bars and value heatmap when available
+
+This makes the project much easier to understand because you can watch the agent act, not just read scalar metrics.
 
 ## Maze Format
 
-Mazes are plain text grids using:
+Maze files are plain text and human-readable:
 
-- `#` for walls
-- `S` for the single start cell
-- `G` for the single goal cell
-- `.` for free cells
+- `#` = wall
+- `S` = start
+- `G` = goal
+- `.` = free cell
 
 Example:
 
@@ -159,96 +254,112 @@ Example:
 Rules:
 
 - all rows must have the same width
-- exactly one `S` and one `G` must exist
+- there must be exactly one `S`
+- there must be exactly one `G`
 - transitions are deterministic
-- the episode ends on reaching the goal or hitting the max step limit
 
-If no `--maze` file is provided, the program uses a built-in default maze that matches the included basic sample.
+Included samples:
 
-## Q-Learning in V1
+- `configs/mazes/basic.txt`
+- `configs/mazes/complex.txt`
 
-The V1 learner is a tabular Q-learning agent with:
+## Project Structure
 
-- epsilon-greedy exploration
-- configurable learning rate
-- configurable discount factor
-- configurable epsilon start / minimum / decay
-- plain-text checkpoint save/load
+Main modules:
 
-State representation:
+- `include/core`, `src/core`: shared RL types and action definitions
+- `include/env`, `src/env`: environment abstractions, maze parsing, maze dynamics
+- `include/agents`, `src/agents`: baseline and learning agents
+- `include/training`, `src/training`: training and evaluation loops
+- `include/metrics`, `src/metrics`: CSV metrics logging
+- `include/render`, `src/render`: trace capture and dashboard export
+- `include/cli`, `src/cli`: command-line parsing and workflow entry points
+- `tests`: unit and integration-style tests
+- `configs/mazes`: sample mazes
+- `docs/architecture.md`: design notes and extension points
 
-- the state is the flattened `(row, col)` position of the agent in the maze grid
+For a deeper architecture walkthrough, see [docs/architecture.md](docs/architecture.md).
 
-Action space:
+## Build And Test
 
-- `up`, `down`, `left`, `right`
+Standard CMake:
 
-Reward function:
-
-- `+10.0` on goal
-- `-0.1` per step
-- `-0.75` extra penalty for invalid moves
-
-Update rule:
-
-```text
-Q(s, a) <- Q(s, a) + alpha * (reward + gamma * max_a' Q(s', a') - Q(s, a))
+```bash
+cmake -S . -B build -G Ninja
+cmake --build build
+ctest --test-dir build --output-on-failure
 ```
 
-For terminal transitions, the bootstrapped future term is omitted.
+Helper scripts:
+
+```bash
+./scripts/build.sh
+./scripts/test.sh
+```
+
+The test suite covers:
+
+- maze parsing and validation
+- reset and transition correctness
+- wall collisions
+- terminal conditions
+- Q-learning update correctness
+- deterministic seeded behavior
+- learning-vs-random regression
+- dashboard export and trace capture smoke coverage
 
 ## Outputs
 
-Training writes:
+Training runs generate artifacts such as:
 
 - `training_metrics.csv`
 - `final_policy.qtable`
 - `best_policy.qtable`
-- `dashboard.html`
-- `dashboard.css`
-- `dashboard.js`
-- `dashboard_data.js`
+- dashboard files
 
-Evaluation and random runs write their own CSV files inside the chosen output directory.
+Evaluation and random runs generate their own metrics CSVs and dashboards in their output directories.
 
-Each CSV row includes at least:
+Metrics include at least:
 
 - `episode`
 - `total_reward`
 - `steps`
 - `solved`
 - `epsilon`
+- moving average reward
+- running success rate
 
-The logger also writes moving-average reward and running success rate to make experiment trends easier to inspect.
+## Who This Project Is For
 
-The dashboard data file embeds:
+This project is a good fit if you want:
 
-- run summary cards
-- configuration details
-- full episode metrics
-- evaluation checkpoints
-- traced episodes for playback
-- state-action values when available
-
-## Included Mazes
-
-- `configs/mazes/basic.txt`: small starter maze
-- `configs/mazes/complex.txt`: larger maze with a longer path and more walls
+- a first serious RL codebase in C++
+- a clean example of tabular RL architecture
+- a portfolio project that mixes systems engineering and AI
+- a practical way to understand exploration, rewards, and policy improvement
+- a base for adding SARSA, DQN, new environments, or richer rendering later
 
 ## Current Limitations
 
-- only tabular agents are implemented in V1
+V1 is intentionally focused and lightweight.
+
+Current limitations:
+
+- only tabular agents are implemented
 - the environment is deterministic and single-agent
-- the dashboard is a static exported web app rather than a live in-process renderer
-- very long runs can generate large dashboard trace files if you choose aggressive trace settings
-- checkpoints use a simple custom text format rather than a richer experiment manifest
-- CLI configuration is flag-based rather than config-file driven
+- the dashboard is exported as a static web bundle rather than a live embedded UI
+- very aggressive tracing can produce larger dashboard data files
+- configuration is CLI-driven rather than config-file driven
+- checkpoints use a simple custom text format
 
-## Roadmap Ideas for V2
+## Roadmap Ideas
 
-- SARSA and Monte Carlo control agents
-- DQN with replay and target networks
-- multiple environments beyond mazes
-- richer experiment configuration files
-- run summaries, plots, and policy trajectory visualization
-- live graphical rendering or a desktop/web control panel
+Good V2 directions include:
+
+- SARSA and Monte Carlo control
+- DQN and replay-buffer-based agents
+- more environments beyond mazes
+- experiment config files
+- side-by-side policy comparison dashboards
+- richer rendering and live control panels
+- multi-run experiment summaries and plots
